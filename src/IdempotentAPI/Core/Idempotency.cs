@@ -387,7 +387,7 @@ namespace IdempotentAPI.Core
                 resultObjects.Add("ResultValue", route.Value);
                 resultObjects.Add("ResultRouteName", route.RouteName);
 
-                Dictionary<string, string?> RouteValues = route.RouteValues.ToDictionary(r => r.Key, r => r.Value.ToString());
+                Dictionary<string, string> RouteValues = route.RouteValues.ToDictionary(r => r.Key, r => r.Value.ToString());
                 resultObjects.Add("ResultRouteValues", RouteValues);
             }
             else if (contextResult is ObjectResult objectResult)
