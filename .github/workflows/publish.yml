@@ -36,7 +36,7 @@ jobs:
       working-directory: ./src/IdempotentAPI    
 
     - name: Push NuGet package
-      run: dotnet nuget push **/*.nupkg -k ${{ secrets.WRITE_PAT }} -s https://nuget.pkg.github.com/koide/index.json
+      run: dotnet nuget push bin/Release/*.nupkg -k ${{ secrets.WRITE_PAT }} -s https://nuget.pkg.github.com/koide/index.json
       working-directory: ./src/IdempotentAPI
 
     - name: Build code
@@ -48,7 +48,7 @@ jobs:
       working-directory: ./src/IdempotentAPI.AccessCache
 
     - name: Push NuGet package
-      run: dotnet nuget push **/*.nupkg -k ${{ secrets.WRITE_PAT }} -s https://nuget.pkg.github.com/koide/index.json
+      run: dotnet nuget push bin/Release/*.nupkg -k ${{ secrets.WRITE_PAT }} -s https://nuget.pkg.github.com/koide/index.json
       working-directory: ./src/IdempotentAPI.AccessCache
 
     - name: Build code
@@ -60,7 +60,7 @@ jobs:
       working-directory: ./src/IdempotentAPI.Cache.Abstractions
 
     - name: Push NuGet package
-      run: dotnet nuget push **/*.nupkg -k ${{ secrets.WRITE_PAT }} -s https://nuget.pkg.github.com/koide/index.json
+      run: dotnet nuget push bin/Release/*.nupkg -k ${{ secrets.WRITE_PAT }} -s https://nuget.pkg.github.com/koide/index.json
       working-directory: ./src/IdempotentAPI.Cache.Abstractions
 
     - name: Build code
@@ -72,7 +72,7 @@ jobs:
       working-directory: ./src/IdempotentAPI.Cache.DistributedCache
 
     - name: Push NuGet package
-      run: dotnet nuget push **/*.nupkg -k ${{ secrets.WRITE_PAT }} -s https://nuget.pkg.github.com/koide/index.json
+      run: dotnet nuget push bin/Release/*.nupkg -k ${{ secrets.WRITE_PAT }} -s https://nuget.pkg.github.com/koide/index.json
       working-directory: ./src/IdempotentAPI.Cache.DistributedCache
 
     - name: Build code
@@ -84,7 +84,7 @@ jobs:
       working-directory: ./src/IdempotentAPI.Cache.FusionCache
 
     - name: Push NuGet package
-      run: dotnet nuget push **/*.nupkg -k ${{ secrets.WRITE_PAT }} -s https://nuget.pkg.github.com/koide/index.json
+      run: dotnet nuget push bin/Release/*.nupkg -k ${{ secrets.WRITE_PAT }} -s https://nuget.pkg.github.com/koide/index.json
       working-directory: ./src/IdempotentAPI.Cache.FusionCache
 
     - name: Build code
@@ -96,7 +96,7 @@ jobs:
       working-directory: ./src/IdempotentAPI.DistributedAccessLock.Abstractions
 
     - name: Push NuGet package
-      run: dotnet nuget push **/*.nupkg -k ${{ secrets.WRITE_PAT }} -s https://nuget.pkg.github.com/koide/index.json
+      run: dotnet nuget push bin/Release/*.nupkg -k ${{ secrets.WRITE_PAT }} -s https://nuget.pkg.github.com/koide/index.json
       working-directory: ./src/IdempotentAPI.DistributedAccessLock.Abstractions
     
     - name: Build code
@@ -108,7 +108,7 @@ jobs:
       working-directory: ./src/IdempotentAPI.DistributedAccessLock.MadelsonDistributedLock
 
     - name: Push NuGet package
-      run: dotnet nuget push **/*.nupkg -k ${{ secrets.WRITE_PAT }} -s https://nuget.pkg.github.com/koide/index.json
+      run: dotnet nuget push bin/Release/*.nupkg -k ${{ secrets.WRITE_PAT }} -s https://nuget.pkg.github.com/koide/index.json
       working-directory: ./src/IdempotentAPI.DistributedAccessLock.MadelsonDistributedLock
     
     - name: Build code
@@ -120,5 +120,5 @@ jobs:
       working-directory: ./src/IdempotentAPI.DistributedAccessLock.RedLockNet
 
     - name: Push NuGet package
-      run: dotnet nuget push **/*.nupkg -k ${{ secrets.WRITE_PAT }} -s https://nuget.pkg.github.com/koide/index.json
+      run: dotnet nuget push bin/Release/*.nupkg -k ${{ secrets.WRITE_PAT }} -s https://nuget.pkg.github.com/koide/index.json
       working-directory: ./src/IdempotentAPI.DistributedAccessLock.RedLockNet
