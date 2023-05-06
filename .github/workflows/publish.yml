@@ -1,0 +1,124 @@
+name: Publish Release to NuGet
+
+on:
+  release:
+    types: [published]
+    
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    
+    steps:
+    - name: Get version
+      run: version=$(echo "$GITHUB_REF" | sed 's/^refs\/tags\/v//g');echo "version=$version" >> $GITHUB_ENV
+      env:
+        GITHUB_REF: ${{ github.ref }}
+
+    - name: Checkout code
+      uses: actions/checkout@v2
+    
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '6'
+        
+    - name: Build code
+      run: dotnet build --configuration Release 
+      working-directory: ./src/IdempotentAPI
+        
+    - name: Run tests
+      run: dotnet test --no-build -v n --configuration Release
+      working-directory: ./tests/IdempotentAPI.UnitTests
+
+    - name: Pack NuGet package
+      run: dotnet pack -p:PackageVersion=${{ env.version }} --configuration Release --no-build
+      working-directory: ./src/IdempotentAPI    
+
+    - name: Push NuGet package
+      run: dotnet nuget push **/*.nupkg -k ${{ secrets.WRITE_PAT }} -s https://nuget.pkg.github.com/koide/index.json
+      working-directory: ./src/IdempotentAPI
+
+    - name: Build code
+      run: dotnet build --configuration Release 
+      working-directory: ./src/IdempotentAPI.AccessCache
+
+    - name: Pack NuGet package
+      run: dotnet pack -p:PackageVersion=${{ env.version }} --configuration Release --no-build
+      working-directory: ./src/IdempotentAPI.AccessCache
+
+    - name: Push NuGet package
+      run: dotnet nuget push **/*.nupkg -k ${{ secrets.WRITE_PAT }} -s https://nuget.pkg.github.com/koide/index.json
+      working-directory: ./src/IdempotentAPI.AccessCache
+
+    - name: Build code
+      run: dotnet build --configuration Release 
+      working-directory: ./src/IdempotentAPI.Cache.Abstractions
+
+    - name: Pack NuGet package
+      run: dotnet pack -p:PackageVersion=${{ env.version }} --configuration Release --no-build
+      working-directory: ./src/IdempotentAPI.Cache.Abstractions
+
+    - name: Push NuGet package
+      run: dotnet nuget push **/*.nupkg -k ${{ secrets.WRITE_PAT }} -s https://nuget.pkg.github.com/koide/index.json
+      working-directory: ./src/IdempotentAPI.Cache.Abstractions
+
+    - name: Build code
+      run: dotnet build --configuration Release 
+      working-directory: ./src/IdempotentAPI.Cache.DistributedCache
+
+    - name: Pack NuGet package
+      run: dotnet pack -p:PackageVersion=${{ env.version }} --configuration Release --no-build
+      working-directory: ./src/IdempotentAPI.Cache.DistributedCache
+
+    - name: Push NuGet package
+      run: dotnet nuget push **/*.nupkg -k ${{ secrets.WRITE_PAT }} -s https://nuget.pkg.github.com/koide/index.json
+      working-directory: ./src/IdempotentAPI.Cache.DistributedCache
+
+    - name: Build code
+      run: dotnet build --configuration Release 
+      working-directory: ./src/IdempotentAPI.Cache.FusionCache
+
+    - name: Pack NuGet package
+      run: dotnet pack -p:PackageVersion=${{ env.version }} --configuration Release --no-build
+      working-directory: ./src/IdempotentAPI.Cache.FusionCache
+
+    - name: Push NuGet package
+      run: dotnet nuget push **/*.nupkg -k ${{ secrets.WRITE_PAT }} -s https://nuget.pkg.github.com/koide/index.json
+      working-directory: ./src/IdempotentAPI.Cache.FusionCache
+
+    - name: Build code
+      run: dotnet build --configuration Release 
+      working-directory: ./src/IdempotentAPI.DistributedAccessLock.Abstractions
+
+    - name: Pack NuGet package
+      run: dotnet pack -p:PackageVersion=${{ env.version }} --configuration Release --no-build
+      working-directory: ./src/IdempotentAPI.DistributedAccessLock.Abstractions
+
+    - name: Push NuGet package
+      run: dotnet nuget push **/*.nupkg -k ${{ secrets.WRITE_PAT }} -s https://nuget.pkg.github.com/koide/index.json
+      working-directory: ./src/IdempotentAPI.DistributedAccessLock.Abstractions
+    
+    - name: Build code
+      run: dotnet build --configuration Release 
+      working-directory: ./src/IdempotentAPI.DistributedAccessLock.MadelsonDistributedLock
+
+    - name: Pack NuGet package
+      run: dotnet pack -p:PackageVersion=${{ env.version }} --configuration Release --no-build
+      working-directory: ./src/IdempotentAPI.DistributedAccessLock.MadelsonDistributedLock
+
+    - name: Push NuGet package
+      run: dotnet nuget push **/*.nupkg -k ${{ secrets.WRITE_PAT }} -s https://nuget.pkg.github.com/koide/index.json
+      working-directory: ./src/IdempotentAPI.DistributedAccessLock.MadelsonDistributedLock
+    
+    - name: Build code
+      run: dotnet build --configuration Release 
+      working-directory: ./src/IdempotentAPI.DistributedAccessLock.RedLockNet
+
+    - name: Pack NuGet package
+      run: dotnet pack -p:PackageVersion=${{ env.version }} --configuration Release --no-build
+      working-directory: ./src/IdempotentAPI.DistributedAccessLock.RedLockNet
+
+    - name: Push NuGet package
+      run: dotnet nuget push **/*.nupkg -k ${{ secrets.WRITE_PAT }} -s https://nuget.pkg.github.com/koide/index.json
+      working-directory: ./src/IdempotentAPI.DistributedAccessLock.RedLockNet
