@@ -24,7 +24,7 @@ namespace IdempotentAPI.AccessCache.Lockers
         {
             _lockedValue = valueToLock;
 
-            LockDisposeTracker disposeTracker;
+            LockDisposeTracker? disposeTracker;
             lock (localLocker)
             {
                 if (!lockValueMapper.TryGetValue(valueToLock, out disposeTracker))

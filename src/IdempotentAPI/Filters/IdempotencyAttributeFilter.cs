@@ -15,14 +15,14 @@ namespace IdempotentAPI.Filters
         private readonly string _distributedCacheKeysPrefix;
         private readonly TimeSpan? _distributedLockTimeout;
         private readonly bool _cacheOnlySuccessResponses;
-        private readonly IIdempotencyAccessCache _distributedCache;
+        private readonly IIdempotencyAccessCache? _distributedCache;
         private readonly ILogger<Idempotency> _logger;
 
         private Idempotency? _idempotency = null;
 
         public IdempotencyAttributeFilter(
-            IIdempotencyAccessCache distributedCache,
-            ILoggerFactory loggerFactory,
+            IIdempotencyAccessCache? distributedCache,
+            ILoggerFactory? loggerFactory,
             bool enabled,
             int expireHours,
             string headerKeyName,

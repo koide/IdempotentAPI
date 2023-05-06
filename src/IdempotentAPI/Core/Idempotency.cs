@@ -42,7 +42,7 @@ namespace IdempotentAPI.Core
         private bool _isPreIdempotencyCacheReturned = false;
 
         public Idempotency(
-            IIdempotencyAccessCache distributedCache,
+            IIdempotencyAccessCache? distributedCache,
             ILogger<Idempotency> logger,
             int expireHours,
             string headerKeyName,
@@ -57,7 +57,7 @@ namespace IdempotentAPI.Core
             _distributedLockTimeout = distributedLockTimeout;
             _logger = logger;
 
-            _hashAlgorithm = new SHA256CryptoServiceProvider();
+            _hashAlgorithm = SHA256.Create();
             _cacheEntryOptions = _distributedCache.CreateCacheEntryOptions(_expireHours);
             _cacheOnlySuccessResponses = cacheOnlySuccessResponses;
         }
@@ -186,7 +186,7 @@ namespace IdempotentAPI.Core
             // RPG - 2021-07-05 - Check if there is a copy of this request in flight,
             // if so return a 409 Http Conflict response.
             if (cacheData.ContainsKey("Request.Inflight")
-                && uniqueRequesId.ToString().ToLower() != cacheData["Request.Inflight"].ToString().ToLower())
+                && uniqueRequesId.ToString().ToLower() != cacheData["Request.Inflight"]?.ToString()?.ToLower())
             {
                 context.Result = new ConflictResult();
                 return;
@@ -196,7 +196,7 @@ namespace IdempotentAPI.Core
             {
                 // 2019-07-06: Evaluate the "Request.DataHash" in order to be sure that the cached
                 // response is returned for the same combination of IdempotencyKey and Request
-                string cachedRequestDataHash = cacheData["Request.DataHash"].ToString();
+                string? cachedRequestDataHash = cacheData["Request.DataHash"]?.ToString();
                 string currentRequestDataHash = GetRequestsDataHash(context.HttpContext.Request);
                 if (cachedRequestDataHash != currentRequestDataHash)
                 {
@@ -209,8 +209,13 @@ namespace IdempotentAPI.Core
                 int responseStatusCode = Convert.ToInt32(cacheData["Response.StatusCode"]);
 
                 Dictionary<string, object> resultObjects = (Dictionary<string, object>)cacheData["Context.Result"];
-                Type contextResultType = Type.GetType(resultObjects["ResultType"].ToString());
-                if (contextResultType == null)
+                var type = resultObjects["ResultType"].ToString();
+                if (type is null)
+                {
+                    throw new NotImplementedException($"ApplyPreIdempotency, ResultType {resultObjects["ResultType"]} is not recognized");
+                }
+                Type? contextResultType = Type.GetType(type);
+                if (contextResultType is null)
                 {
                     throw new NotImplementedException($"ApplyPreIdempotency, ResultType {resultObjects["ResultType"]} is not recognized");
                 }
@@ -229,7 +234,7 @@ namespace IdempotentAPI.Core
                     || contextResultType == typeof(ObjectResult))
                 {
                     object value = resultObjects["ResultValue"];
-                    ConstructorInfo ctor = contextResultType.GetConstructor(new[] { typeof(object) });
+                    ConstructorInfo? ctor = contextResultType.GetConstructor(new[] { typeof(object) });
                     if (ctor != null && ctor.DeclaringType != typeof(ObjectResult))
                     {
                         context.Result = (IActionResult)ctor.Invoke(new object[] { value });
@@ -242,7 +247,7 @@ namespace IdempotentAPI.Core
                 else if (contextResultType.BaseType == typeof(StatusCodeResult)
                     || contextResultType.BaseType == typeof(ActionResult))
                 {
-                    ConstructorInfo ctor = contextResultType.GetConstructor(Array.Empty<Type>());
+                    ConstructorInfo? ctor = contextResultType.GetConstructor(Array.Empty<Type>());
                     if (ctor != null)
                     {
                         context.Result = (IActionResult)ctor.Invoke(Array.Empty<object>());
@@ -261,10 +266,16 @@ namespace IdempotentAPI.Core
                     {
                         if (!context.HttpContext.Response.Headers.ContainsKey(headerKeyValue.Key))
                         {
-                            context.HttpContext.Response.Headers.Add(headerKeyValue.Key, headerKeyValue.Value.ToArray());
+                            context.HttpContext.Response.Headers.Add(headerKeyValue.Key, headerKeyValue.Value.ToArray()[0]);
                         }
                     }
                 }
+
+                // if (context.HttpContext.Response.Headers.ContainsKey("Content-Type"))
+                // {
+                //     context.HttpContext.Response.Headers.Remove("Content-Type");
+                //     context.HttpContext.Response.Headers.Add("Content-Type", "application/json");
+                // }
 
                 if (IsLoggerEnabled(LogLevel.Information))
                 {
@@ -341,18 +352,32 @@ namespace IdempotentAPI.Core
 
             //Cache Response params:
             cacheData.Add("Response.StatusCode", context.HttpContext.Response.StatusCode);
-            cacheData.Add("Response.ContentType", context.HttpContext.Response.ContentType);
+            cacheData.Add("Response.ContentType", context.HttpContext.Response.ContentType.Replace("; charset=utf-8", string.Empty).Replace("; charset=UTF-8", string.Empty));
 
             Dictionary<string, List<string>> Headers = context.HttpContext.Response.Headers
                 .Where(h => !_excludeHttpHeaderKeys.Contains(h.Key))
                 .ToDictionary(h => h.Key, h => h.Value.ToList());
 
+            if (context.HttpContext.Response.Headers.ContainsKey("Content-Length"))
+            {
+                Headers.Add("Content-Length", new List<string> { context.HttpContext.Response.Headers["Content-Length"] });
+            }            
+            
+            if (Headers.ContainsKey("Content-Type")) {
+                var contentTypeList = new List<string>();
+                foreach (var h in Headers["Content-Type"])
+                {
+                    contentTypeList.Add(h.Replace("; charset=utf-8", string.Empty).Replace("; charset=UTF-8", string.Empty));
+                }
+                Headers["Content-Type"] = contentTypeList;
+            }
+            
             cacheData.Add("Response.Headers", Headers);
 
 
             // 2019-07-05: Response.Body cannot be accessed because its not yet created.
             // We are saving the Context.Result, because based on this the Response.Body is created.
-            Dictionary<string, object> resultObjects = new();
+            Dictionary<string, object?> resultObjects = new();
             var contextResult = context.Result;
             resultObjects.Add("ResultType", contextResult.GetType().AssemblyQualifiedName);
 
@@ -362,7 +387,7 @@ namespace IdempotentAPI.Core
                 resultObjects.Add("ResultValue", route.Value);
                 resultObjects.Add("ResultRouteName", route.RouteName);
 
-                Dictionary<string, string> RouteValues = route.RouteValues.ToDictionary(r => r.Key, r => r.Value.ToString());
+                Dictionary<string, string?> RouteValues = route.RouteValues.ToDictionary(r => r.Key, r => r.Value.ToString());
                 resultObjects.Add("ResultRouteValues", RouteValues);
             }
             else if (contextResult is ObjectResult objectResult)

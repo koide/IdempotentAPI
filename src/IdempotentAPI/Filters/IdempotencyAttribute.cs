@@ -34,8 +34,8 @@ namespace IdempotentAPI.Filters
 
         public IFilterMetadata CreateInstance(IServiceProvider serviceProvider)
         {
-            var distributedCache = (IIdempotencyAccessCache)serviceProvider.GetService(typeof(IIdempotencyAccessCache));
-            var loggerFactory = (ILoggerFactory)serviceProvider.GetService(typeof(ILoggerFactory));
+            var distributedCache = (IIdempotencyAccessCache?)serviceProvider.GetService(typeof(IIdempotencyAccessCache));
+            var loggerFactory = (ILoggerFactory?)serviceProvider.GetService(typeof(ILoggerFactory));
 
             TimeSpan? distributedLockTimeout = DistributedLockTimeoutMilli >= 0
                 ? TimeSpan.FromMilliseconds(DistributedLockTimeoutMilli)

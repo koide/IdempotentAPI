@@ -71,6 +71,11 @@ namespace IdempotentAPI.Helpers
 
             byte[]? encodedData = Decompress(compressedBytes);
 
+            if (encodedData is null)
+            {
+                return default;
+            }
+
             string jsonString = Encoding.UTF8.GetString(encodedData);
 
             return JsonConvert.DeserializeObject<T>(jsonString, _jsonSerializerSettingsAuto);
@@ -126,13 +131,13 @@ namespace IdempotentAPI.Helpers
 
         public static IDictionary<string, T> AnonymousObjectToDictionary<T>(
             object obj,
-            Func<object, T> valueSelect)
+            Func<object?, T> valueSelect)
         {
             return TypeDescriptor.GetProperties(obj)
                 .OfType<PropertyDescriptor>()
                 .ToDictionary(
                     prop => prop.Name,
-                    prop => valueSelect(prop.GetValue(obj))
+                    prop => valueSelect(prop?.GetValue(obj))
                 );
         }
 
