@@ -358,7 +358,7 @@ namespace IdempotentAPI.Core
 
             //Cache Response params:
             cacheData.Add("Response.StatusCode", context.HttpContext.Response.StatusCode);
-            cacheData.Add("Response.ContentType", context.HttpContext.Response.ContentType.Replace("; charset=utf-8", string.Empty).Replace("; charset=UTF-8", string.Empty));
+            cacheData.Add("Response.ContentType", context.HttpContext.Response.ContentType);
 
             Dictionary<string, List<string>> Headers = context.HttpContext.Response.Headers
                 .Where(h => !_excludeHttpHeaderKeys.Contains(h.Key))
@@ -369,17 +369,7 @@ namespace IdempotentAPI.Core
                 Headers.Add("Content-Length", new List<string> { context.HttpContext.Response.Headers["Content-Length"] });
             }            
             
-            if (Headers.ContainsKey("Content-Type")) {
-                var contentTypeList = new List<string>();
-                foreach (var h in Headers["Content-Type"])
-                {
-                    contentTypeList.Add(h.Replace("; charset=utf-8", string.Empty).Replace("; charset=UTF-8", string.Empty));
-                }
-                Headers["Content-Type"] = contentTypeList;
-            }
-            
             cacheData.Add("Response.Headers", Headers);
-
 
             // 2019-07-05: Response.Body cannot be accessed because its not yet created.
             // We are saving the Context.Result, because based on this the Response.Body is created.
