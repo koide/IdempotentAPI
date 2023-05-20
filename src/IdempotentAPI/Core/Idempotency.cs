@@ -116,9 +116,18 @@ namespace IdempotentAPI.Core
                 return;
             }
 
+            byte[]? cacheDataBytes;
             // Generate the data to be cached
-            byte[]? cacheDataBytes = await GenerateCacheData(context).ConfigureAwait(false);
-
+            try 
+            {
+                cacheDataBytes = await GenerateCacheData(context).ConfigureAwait(false);
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError($"Generating cache data using {context?.HttpContext?.Request?.Path}", exception);
+                return;
+            }
+            
             // Save to cache:
             try
             {
