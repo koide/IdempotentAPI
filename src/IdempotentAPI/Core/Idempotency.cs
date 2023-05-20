@@ -124,7 +124,7 @@ namespace IdempotentAPI.Core
             }
             catch (Exception exception)
             {
-                _logger.LogError($"Generating cache data using {context?.HttpContext?.Request?.Path}", exception);
+                _logger.LogError($"Generating cache data failed - this request will return conflict from now on.", exception);
                 return;
             }
             
@@ -373,11 +373,6 @@ namespace IdempotentAPI.Core
                 .Where(h => !_excludeHttpHeaderKeys.Contains(h.Key))
                 .ToDictionary(h => h.Key, h => h.Value.ToList());
 
-            if (context.HttpContext.Response.Headers.ContainsKey("Content-Length"))
-            {
-                Headers.Add("Content-Length", new List<string> { context.HttpContext.Response.Headers["Content-Length"] });
-            }            
-            
             cacheData.Add("Response.Headers", Headers);
 
             // 2019-07-05: Response.Body cannot be accessed because its not yet created.
